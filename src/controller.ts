@@ -29,7 +29,7 @@ export function invoke<A extends unknown[]>(fn: ((...args: A) => void) | undefin
 
 export function assertBrowser(): void {
   if (typeof window === 'undefined' || typeof document === 'undefined') {
-    throw new Error('@usewarp/js can only open a checkout in the browser')
+    throw new Error('@warpfi/js can only open a checkout in the browser')
   }
 }
 

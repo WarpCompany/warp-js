@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in @usewarp/js.
+Thanks for your interest in @warpfi/js.
 
 ## Development
 

@@ -1,5 +1,5 @@
 {
-  "name": "@usewarp/js",
+  "name": "@warpfi/js",
   "version": "0.1.0",
   "description": "Embedded checkout for Pay with Warp: inline iframe, modal, popup and the <warp-checkout> web component.",
   "keywords": [
@@ -14,7 +14,10 @@
   "license": "MIT",
   "author": "Warp Labs",
   "homepage": "https://developer.usewarp.net",
-  "repository": "github:WarpCompany/warp-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WarpCompany/warp-js.git"
+  },
   "bugs": "https://github.com/WarpCompany/warp-js/issues",
   "type": "module",
   "main": "./dist/index.cjs",

@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@usewarp/js"><img src="https://img.shields.io/npm/v/@usewarp/js?color=9E1FAA" alt="npm" /></a>
+  <a href="https://www.npmjs.com/package/@warpfi/js"><img src="https://img.shields.io/npm/v/@warpfi/js?color=9E1FAA" alt="npm" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT" /></a>
   <a href="https://developer.usewarp.net"><img src="https://img.shields.io/badge/docs-developer.usewarp.net-9E1FAA" alt="Docs" /></a>
 </p>
@@ -36,24 +36,24 @@ Your server creates a checkout session with your `sk_` secret key and returns it
 
 ## Installation
 
-Requirements: a modern browser. Works with any framework or none. For React and Vue, see [@usewarp/react](https://github.com/WarpCompany/warp-react) and [@usewarp/vue](https://github.com/WarpCompany/warp-vue).
+Requirements: a modern browser. Works with any framework or none. For React and Vue, see [@warpfi/react](https://github.com/WarpCompany/warp-react) and [@warpfi/vue](https://github.com/WarpCompany/warp-vue).
 
 ```bash
-npm install @usewarp/js
+npm install @warpfi/js
 ```
 
 Or load it from a CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@usewarp/js@0/dist/warp.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@warpfi/js@0/dist/warp.global.js"></script>
 ```
 
 ## Usage
 
-Create the session on your server with [@usewarp/node](https://github.com/WarpCompany/warp-node). Never put your secret key in the browser.
+Create the session on your server with [@warpfi/node](https://github.com/WarpCompany/warp-node). Never put your secret key in the browser.
 
 ```ts
-import Warp from '@usewarp/node'
+import Warp from '@warpfi/node'
 const warp = new Warp(process.env.WARP_SECRET_KEY!)
 app.post('/api/checkout', async (req, res) => {
   const session = await warp.checkout.sessions.create({ amount_usd: '49.99', return_url: 'https://example.com/thanks', cancel_url: 'https://example.com/cart' })
@@ -64,7 +64,7 @@ app.post('/api/checkout', async (req, res) => {
 Then mount the checkout in the browser:
 
 ```ts
-import { mountCheckout } from '@usewarp/js'
+import { mountCheckout } from '@warpfi/js'
 
 async function fetchCheckoutUrl(): Promise<string> {
   const res = await fetch('/api/checkout', { method: 'POST' })
@@ -94,7 +94,7 @@ The CDN build exposes `window.Warp` and registers `<warp-checkout>`.
 
 ```html
 <div id="checkout"></div>
-<script src="https://cdn.jsdelivr.net/npm/@usewarp/js@0/dist/warp.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@warpfi/js@0/dist/warp.global.js"></script>
 <script>
   fetch('/api/checkout', { method: 'POST' })
     .then((res) => res.json())
@@ -112,7 +112,7 @@ The CDN build exposes `window.Warp` and registers `<warp-checkout>`.
 Opens a full-screen overlay. It closes on Escape, a backdrop click or the close button (calling `onCancel` if the payment has not completed), and after `onCancel` or `onReturn` from the checkout page. Each time it closes on its own, `onClose` is called last, so you can reset your UI there.
 
 ```ts
-import { openCheckoutModal } from '@usewarp/js'
+import { openCheckoutModal } from '@warpfi/js'
 
 document.querySelector('#pay')!.addEventListener('click', () => {
   openCheckoutModal({
@@ -130,7 +130,7 @@ document.querySelector('#pay')!.addEventListener('click', () => {
 Use a popup when the checkout cannot run in a frame on your page, for example when the customer's wallet does not work inside iframes. Call it directly in a click handler: the window opens immediately and is pointed at the checkout once `fetchCheckoutUrl` resolves. If the customer closes the window before paying, `onCancel` is called. Whenever the window closes on its own or is closed by the customer, `onClose` is called last.
 
 ```ts
-import { openCheckoutPopup } from '@usewarp/js'
+import { openCheckoutPopup } from '@warpfi/js'
 
 button.addEventListener('click', () => {
   openCheckoutPopup({
@@ -149,7 +149,7 @@ If your page uses COOP, set it to `same-origin-allow-popups` so the popup can re
 
 ```html
 <script type="module">
-  import '@usewarp/js/element'
+  import '@warpfi/js/element'
 </script>
 
 <warp-checkout checkout-url="https://checkout.usewarp.net/session/ps_..." theme="auto"></warp-checkout>
@@ -210,7 +210,7 @@ This package accepts a message only if it comes from `checkoutOrigin` and from t
 | `isWarpCheckoutMessage(data)` | Type guard for checkout messages |
 | `WarpCheckoutError` | Error class with a `code` |
 | `DEFAULT_CHECKOUT_ORIGIN` | `https://checkout.usewarp.net` |
-| `@usewarp/js/element` | Registers `<warp-checkout>`. Exports `WarpCheckoutElement` and `defineWarpCheckoutElement(tagName?)` |
+| `@warpfi/js/element` | Registers `<warp-checkout>`. Exports `WarpCheckoutElement` and `defineWarpCheckoutElement(tagName?)` |
 | Types | `CheckoutOptions`, `CheckoutInstance`, `CheckoutStatus`, `CheckoutTheme`, `WarpCheckoutMessage`, `WarpCheckoutErrorCode` |
 
 `CheckoutOptions`: `checkoutUrl` or `fetchCheckoutUrl`, `theme` (`'auto'` by default), `checkoutOrigin` (for self-hosted or staging checkouts), `signal`, and the callbacks above. `CheckoutInstance` has `sessionId`, `status` and an idempotent `destroy()` that removes the DOM and all listeners.
