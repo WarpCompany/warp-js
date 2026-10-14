@@ -1,0 +1,69 @@
+{
+  "name": "@usewarp/js",
+  "version": "0.1.0",
+  "description": "Embedded checkout for Pay with Warp: inline iframe, modal, popup and the <warp-checkout> web component.",
+  "keywords": [
+    "warp",
+    "pay-with-warp",
+    "payments",
+    "crypto",
+    "checkout",
+    "embed",
+    "web-component"
+  ],
+  "license": "MIT",
+  "author": "Warp Labs",
+  "homepage": "https://developer.usewarp.net",
+  "repository": "github:WarpCompany/warp-js",
+  "bugs": "https://github.com/WarpCompany/warp-js/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/warp.global.js",
+  "jsdelivr": "./dist/warp.global.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./element": {
+      "import": {
+        "types": "./dist/element.d.ts",
+        "default": "./dist/element.js"
+      },
+      "require": {
+        "types": "./dist/element.d.cts",
+        "default": "./dist/element.cjs"
+      }
+    },
+    "./warp.global.js": "./dist/warp.global.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "./dist/element.js",
+    "./dist/element.cjs",
+    "./dist/warp.global.js"
+  ],
+  "scripts": {
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsup",
+    "test": "vitest run",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run lint && npm test && npm run build"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
