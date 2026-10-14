@@ -109,7 +109,7 @@ The CDN build exposes `window.Warp` and registers `<warp-checkout>`.
 
 ### Modal
 
-Opens a full-screen overlay. It closes on Escape, a backdrop click or the close button (calling `onCancel`), and after `onReturn`.
+Opens a full-screen overlay. It closes on Escape, a backdrop click or the close button (calling `onCancel` if the payment has not completed), and after `onCancel` or `onReturn` from the checkout page. Each time it closes on its own, `onClose` is called last, so you can reset your UI there.
 
 ```ts
 import { openCheckoutModal } from '@usewarp/js'
@@ -119,14 +119,15 @@ document.querySelector('#pay')!.addEventListener('click', () => {
     fetchCheckoutUrl,
     theme: 'dark',
     onComplete: () => showThankYou(),
-    onCancel: () => console.log('Checkout closed'),
+    onCancel: () => console.log('Checkout cancelled'),
+    onClose: () => console.log('Checkout closed'),
   }).catch(() => {})
 })
 ```
 
 ### Popup fallback
 
-Use a popup when the checkout cannot run in a frame on your page, for example when the customer's wallet does not work inside iframes. Call it directly in a click handler: the window opens immediately and is pointed at the checkout once `fetchCheckoutUrl` resolves. If the customer closes the window before paying, `onCancel` is called.
+Use a popup when the checkout cannot run in a frame on your page, for example when the customer's wallet does not work inside iframes. Call it directly in a click handler: the window opens immediately and is pointed at the checkout once `fetchCheckoutUrl` resolves. If the customer closes the window before paying, `onCancel` is called. Whenever the window closes on its own or is closed by the customer, `onClose` is called last.
 
 ```ts
 import { openCheckoutPopup } from '@usewarp/js'
@@ -172,6 +173,7 @@ Attributes: `checkout-url` (required), `theme` (`light`, `dark` or `auto`) and `
 | `onCancel()` | `warp:cancel` | The customer clicked "Cancel and return", or closed the modal or popup before completing |
 | `onReturn()` | `warp:return` | The customer clicked "Back to merchant" on the success page |
 | `onError(error)` | `warp:error` (`detail.error`) | A `WarpCheckoutError`, see below |
+| `onClose()` | (none) | Modal and popup only: the checkout closed, after any `onCancel` or `onReturn`. Fires once, including when the customer closes it after paying. Not called when you call `destroy()` or abort the `signal`, and never for inline checkouts |
 
 `WarpCheckoutError.code` is one of:
 

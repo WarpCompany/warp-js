@@ -19,6 +19,13 @@ export interface CheckoutOptions {
   onReturn?: () => void
   onError?: (error: WarpCheckoutError) => void
   /**
+   * Modal and popup only: the checkout closed itself. Fires once, after onCancel / onReturn,
+   * when the customer dismisses it (close button, Escape, backdrop, popup window closed), also
+   * after a completed payment, or when it closes after a cancel or return. Not called when you
+   * call destroy() or abort the signal, and never called by mountCheckout.
+   */
+  onClose?: () => void
+  /**
    * Optional. Aborting before the returned promise settles tears everything down and rejects
    * with a 'destroyed' error. Aborting afterwards is the same as calling destroy().
    */

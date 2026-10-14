@@ -29,7 +29,7 @@ function showPlaceholder(popup: Window): void {
   }
 }
 
-/** Popup window (fallback when framing is not allowed). Call from a user gesture; opens the window synchronously, then navigates it once the URL resolves. */
+/** Popup window (fallback when framing is not allowed). Call from a user gesture; opens the window synchronously, then navigates it once the URL resolves. Calls onClose when the window closes. */
 export function openCheckoutPopup(options: CheckoutOptions): Promise<CheckoutInstance> {
   const c = new Controller(options)
   let popup: Window | null = null
@@ -70,8 +70,8 @@ export function openCheckoutPopup(options: CheckoutOptions): Promise<CheckoutIns
         // ignore
       }
     })
-    c.hooks.cancel = () => c.destroy()
-    c.hooks.return = () => c.destroy()
+    c.hooks.cancel = () => c.close()
+    c.hooks.return = () => c.close()
 
     const src = await c.resolveUrl('popup')
     if (c.destroyed) return

@@ -100,6 +100,100 @@ describe('openCheckoutModal', () => {
     expect(overlay()).toBeNull()
   })
 
+  it('calls onClose without onCancel when closed after completion', async () => {
+    const onCancel = vi.fn()
+    const onClose = vi.fn()
+    await openCheckoutModal({ checkoutUrl: CHECKOUT_URL, onCancel, onClose })
+    post(frameOf(overlay()!).contentWindow, msg('status', { status: 'completed' }))
+    expect(onClose).not.toHaveBeenCalled()
+    ;(document.querySelector('.warp-close') as HTMLButtonElement).click()
+    expect(onCancel).not.toHaveBeenCalled()
+    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(overlay()).toBeNull()
+  })
+
+  it('calls onCancel then onClose on Escape before completion, once', async () => {
+    const calls: string[] = []
+    await openCheckoutModal({
+      checkoutUrl: CHECKOUT_URL,
+      onCancel: () => calls.push('cancel'),
+      onClose: () => {
+        expect(overlay()).toBeNull()
+        calls.push('close')
+      },
+    })
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    expect(calls).toEqual(['cancel', 'close'])
+  })
+
+  it('calls onClose on backdrop click and after cancel and return messages', async () => {
+    const onClose = vi.fn()
+    await openCheckoutModal({ checkoutUrl: CHECKOUT_URL, onClose })
+    overlay()!.click()
+    expect(onClose).toHaveBeenCalledTimes(1)
+
+    const calls: string[] = []
+    await openCheckoutModal({
+      checkoutUrl: CHECKOUT_URL,
+      onCancel: () => calls.push('cancel'),
+      onClose: () => calls.push('close'),
+    })
+    post(frameOf(overlay()!).contentWindow, msg('cancel'))
+    expect(calls).toEqual(['cancel', 'close'])
+
+    calls.length = 0
+    await openCheckoutModal({
+      checkoutUrl: CHECKOUT_URL,
+      onReturn: () => calls.push('return'),
+      onClose: () => calls.push('close'),
+    })
+    const win = frameOf(overlay()!).contentWindow
+    post(win, msg('status', { status: 'completed' }))
+    post(win, msg('return'))
+    expect(calls).toEqual(['return', 'close'])
+    expect(overlay()).toBeNull()
+  })
+
+  it('does not call onClose when the merchant calls destroy() or aborts', async () => {
+    const onClose = vi.fn()
+    const instance = await openCheckoutModal({ checkoutUrl: CHECKOUT_URL, onClose })
+    instance.destroy()
+    expect(overlay()).toBeNull()
+
+    const controller = new AbortController()
+    await openCheckoutModal({ checkoutUrl: CHECKOUT_URL, onClose, signal: controller.signal })
+    controller.abort()
+    expect(overlay()).toBeNull()
+
+    // destroy() from inside onCancel takes precedence over the automatic close.
+    let inst: { destroy(): void } | null = null
+    inst = await openCheckoutModal({ checkoutUrl: CHECKOUT_URL, onClose, onCancel: () => inst?.destroy() })
+    post(frameOf(overlay()!).contentWindow, msg('cancel'))
+    expect(overlay()).toBeNull()
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
+  it('calls onClose when dismissed while fetching the URL', async () => {
+    const onClose = vi.fn()
+    const promise = openCheckoutModal({
+      fetchCheckoutUrl: () => new Promise((r) => setTimeout(() => r(CHECKOUT_URL), 20)),
+      onClose,
+    })
+    await Promise.resolve()
+    ;(document.querySelector('.warp-close') as HTMLButtonElement).click()
+    await expect(promise).rejects.toMatchObject({ code: 'destroyed' })
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not call onClose on fetch_failed', async () => {
+    const onClose = vi.fn()
+    await expect(
+      openCheckoutModal({ fetchCheckoutUrl: () => Promise.reject(new Error('nope')), onClose }),
+    ).rejects.toMatchObject({ code: 'fetch_failed' })
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
   it('pulls focus back into the dialog', async () => {
     const outside = document.createElement('input')
     document.body.appendChild(outside)

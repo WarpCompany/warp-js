@@ -6,7 +6,7 @@ import { buildEmbedUrl, normalizeCheckoutOrigin, parseCheckoutUrl } from './url'
 export interface ControllerHooks {
   ready?: () => void
   resize?: (height: number) => void
-  /** Runs after the user's onCancel / onReturn (modal and popup close themselves here). */
+  /** Runs after the user's onCancel / onReturn (modal and popup call close() here). */
   cancel?: () => void
   return?: () => void
 }
@@ -115,7 +115,17 @@ export class Controller {
   dismiss(): void {
     if (this.destroyedFlag) return
     if (!this.completed) invoke(this.options.onCancel)
+    this.close()
+  }
+
+  /**
+   * Closes a modal or popup on its own (customer dismissal, or after onCancel / onReturn)
+   * and then calls onClose. Not used for inline checkouts or when the merchant calls destroy().
+   */
+  close(): void {
+    if (this.destroyedFlag) return
     this.destroy()
+    invoke(this.options.onClose)
   }
 
   destroy(): void {

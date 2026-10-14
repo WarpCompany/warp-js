@@ -5,7 +5,7 @@ import type { CheckoutInstance, CheckoutOptions } from './types'
 const CLOSE_ICON =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>'
 
-/** Full-screen modal overlay with the iframe; closes on Escape/backdrop/close button (calls onCancel) and after onReturn. */
+/** Full-screen modal overlay with the iframe; closes on Escape/backdrop/close button (calls onCancel) and after onReturn, then calls onClose. */
 export function openCheckoutModal(options: CheckoutOptions): Promise<CheckoutInstance> {
   const c = new Controller(options)
   return run(c, async () => {
@@ -71,8 +71,8 @@ export function openCheckoutModal(options: CheckoutOptions): Promise<CheckoutIns
       if (previousFocus && previousFocus.isConnected) previousFocus.focus()
     })
 
-    c.hooks.cancel = () => c.destroy()
-    c.hooks.return = () => c.destroy()
+    c.hooks.cancel = () => c.close()
+    c.hooks.return = () => c.close()
 
     const src = await c.resolveUrl('iframe')
     if (c.destroyed) return

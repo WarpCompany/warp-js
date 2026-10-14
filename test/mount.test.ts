@@ -100,10 +100,11 @@ describe('mountCheckout', () => {
     instance.destroy()
   })
 
-  it('calls onCancel and onReturn without removing the inline iframe', async () => {
+  it('calls onCancel and onReturn without removing the inline iframe or calling onClose', async () => {
     const onCancel = vi.fn()
     const onReturn = vi.fn()
-    const instance = await mountCheckout(container, { checkoutUrl: CHECKOUT_URL, onCancel, onReturn })
+    const onClose = vi.fn()
+    const instance = await mountCheckout(container, { checkoutUrl: CHECKOUT_URL, onCancel, onReturn, onClose })
     const win = frameOf(container).contentWindow
     post(win, msg('cancel'))
     post(win, msg('return'))
@@ -111,6 +112,7 @@ describe('mountCheckout', () => {
     expect(onReturn).toHaveBeenCalledTimes(1)
     expect(container.querySelector('iframe')).not.toBeNull()
     instance.destroy()
+    expect(onClose).not.toHaveBeenCalled()
   })
 
   it('destroy removes DOM and listeners and is idempotent', async () => {

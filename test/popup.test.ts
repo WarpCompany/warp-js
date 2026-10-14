@@ -143,4 +143,67 @@ describe('openCheckoutPopup', () => {
     expect(onCancel).toHaveBeenCalledTimes(1)
     expect(popupB.close).toHaveBeenCalled()
   })
+
+  it('calls onClose once when the popup window is closed, before or after completion', async () => {
+    vi.useFakeTimers()
+    const popupA = fakePopup()
+    vi.spyOn(window, 'open').mockReturnValue(popupA as unknown as Window)
+    const calls: string[] = []
+    await openCheckoutPopup({
+      checkoutUrl: CHECKOUT_URL,
+      onCancel: () => calls.push('cancel'),
+      onClose: () => calls.push('close'),
+    })
+    popupA.closed = true
+    vi.advanceTimersByTime(600)
+    vi.advanceTimersByTime(5000)
+    expect(calls).toEqual(['cancel', 'close'])
+
+    const popupB = fakePopup()
+    vi.spyOn(window, 'open').mockReturnValue(popupB as unknown as Window)
+    const onCancel = vi.fn()
+    const onClose = vi.fn()
+    await openCheckoutPopup({ checkoutUrl: CHECKOUT_URL, onCancel, onClose })
+    post(popupB, msg('status', { status: 'completed' }))
+    popupB.closed = true
+    vi.advanceTimersByTime(1000)
+    expect(onCancel).not.toHaveBeenCalled()
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('calls onClose after cancel and return messages close the popup', async () => {
+    const popupA = fakePopup()
+    vi.spyOn(window, 'open').mockReturnValue(popupA as unknown as Window)
+    const calls: string[] = []
+    await openCheckoutPopup({
+      checkoutUrl: CHECKOUT_URL,
+      onCancel: () => calls.push('cancel'),
+      onClose: () => calls.push('close'),
+    })
+    post(popupA, msg('cancel'))
+    expect(calls).toEqual(['cancel', 'close'])
+
+    calls.length = 0
+    const popupB = fakePopup()
+    vi.spyOn(window, 'open').mockReturnValue(popupB as unknown as Window)
+    await openCheckoutPopup({
+      checkoutUrl: CHECKOUT_URL,
+      onReturn: () => calls.push('return'),
+      onClose: () => calls.push('close'),
+    })
+    post(popupB, msg('return'))
+    expect(calls).toEqual(['return', 'close'])
+  })
+
+  it('does not call onClose when the merchant calls destroy()', async () => {
+    vi.useFakeTimers()
+    const popup = fakePopup()
+    vi.spyOn(window, 'open').mockReturnValue(popup as unknown as Window)
+    const onClose = vi.fn()
+    const instance = await openCheckoutPopup({ checkoutUrl: CHECKOUT_URL, onClose })
+    instance.destroy()
+    expect(popup.close).toHaveBeenCalled()
+    vi.advanceTimersByTime(2000)
+    expect(onClose).not.toHaveBeenCalled()
+  })
 })
